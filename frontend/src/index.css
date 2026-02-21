@@ -1,0 +1,847 @@
+/* ===== CSS Reset & Global Styles ===== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-primary: #0f1117;
+  --bg-secondary: #1a1d28;
+  --bg-card: #1e2233;
+  --bg-card-hover: #252a3a;
+  --bg-input: #141722;
+  --border-color: #2a2e3e;
+  --border-subtle: #1f2335;
+  --text-primary: #e4e4e7;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --accent-blue: #5b6abf;
+  --accent-blue-hover: #6b7acf;
+  --accent-green: #22c55e;
+  --accent-yellow: #f59e0b;
+  --accent-orange: #f97316;
+  --accent-red: #ef4444;
+  --difficulty-easy: #22c55e;
+  --difficulty-medium: #f59e0b;
+  --difficulty-hard: #ef4444;
+  --progress-bg: #374151;
+  --progress-fill: #5b6abf;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --radius: 8px;
+  --radius-sm: 6px;
+  --radius-lg: 12px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ===== App Layout ===== */
+.app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 32px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.app-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.app-title span {
+  background: linear-gradient(135deg, #7c8aff 0%, #5b6abf 50%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+/* ===== Topic Tabs ===== */
+.topic-tabs-wrapper {
+  position: relative;
+  margin-bottom: 28px;
+}
+
+.topic-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-top: 10px;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.topic-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.topic-tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.topic-tab:hover {
+  border-color: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+.topic-tab.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+.topic-tab.add-tab {
+  border-style: dashed;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.topic-tab.add-tab:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+/* ===== Subtopic Card ===== */
+.subtopic-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.subtopic-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.subtopic-header:hover {
+  background: var(--bg-card-hover);
+}
+
+.subtopic-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.subtopic-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.subtopic-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.subtopic-stats {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.progress-bar-container {
+  width: 160px;
+  height: 6px;
+  background: var(--progress-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--progress-fill);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.collapse-icon {
+  color: var(--text-secondary);
+  transition: transform 0.3s ease;
+  font-size: 18px;
+}
+
+.collapse-icon.open {
+  transform: rotate(180deg);
+}
+
+/* ===== Description Box ===== */
+.subtopic-description {
+  padding: 0 24px 16px;
+}
+
+.desc-box {
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  border-left: 3px solid;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.desc-box.scenario {
+  background: rgba(91, 106, 191, 0.08);
+  border-color: var(--accent-blue);
+}
+
+/* ===== Problems Table ===== */
+.problems-section {
+  padding: 0 24px 20px;
+}
+
+.problems-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.problems-table thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.problems-table thead th:not(:first-child) {
+  text-align: center;
+}
+
+.problems-table tbody tr {
+  transition: background 0.15s;
+}
+
+.problems-table tbody tr:hover {
+  background: var(--bg-card-hover);
+}
+
+.problems-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px dashed var(--border-subtle);
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.problems-table tbody td:not(:first-child) {
+  text-align: center;
+}
+
+.problems-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Problem name link */
+.problem-name {
+  color: var(--accent-blue);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.problem-name:hover {
+  color: var(--accent-blue-hover);
+  text-decoration: underline;
+}
+
+/* LeetCode icon */
+.leetcode-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-orange);
+  transition: color 0.2s;
+}
+
+.leetcode-link:hover {
+  color: var(--accent-yellow);
+}
+
+.leetcode-link svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Checkbox */
+.done-checkbox {
+  width: 18px;
+  height: 18px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  background: transparent;
+}
+
+.done-checkbox:checked {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.done-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.done-checkbox:hover {
+  border-color: var(--accent-green);
+}
+
+/* Difficulty badge */
+.difficulty-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.difficulty-badge.easy {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--difficulty-easy);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.difficulty-badge.medium {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--difficulty-medium);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.difficulty-badge.hard {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--difficulty-hard);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* Bookmark */
+.bookmark-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 20px;
+  transition: color 0.2s, transform 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+
+.bookmark-btn:hover {
+  color: var(--accent-yellow);
+  transform: scale(1.15);
+}
+
+.bookmark-btn.active {
+  color: var(--accent-yellow);
+}
+
+/* Code button */
+.code-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  font-size: 16px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.code-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  background: rgba(91, 106, 191, 0.08);
+}
+
+.code-btn.has-code {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+/* Delete button */
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 15px;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.delete-btn:hover {
+  color: var(--accent-red);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ===== Add Problem Row ===== */
+.add-problem-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.add-problem-input {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.add-problem-input:focus {
+  border-color: var(--accent-blue);
+}
+
+.add-problem-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ===== Buttons ===== */
+.btn {
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-blue-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--accent-red);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* ===== Modal Overlay ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 90%;
+  max-width: 520px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.25s ease;
+}
+
+.modal.modal-lg {
+  max-width: 800px;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.modal-field {
+  margin-bottom: 16px;
+}
+
+.modal-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.modal-field input,
+.modal-field textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modal-field input:focus,
+.modal-field textarea:focus {
+  border-color: var(--accent-blue);
+}
+
+.modal-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+/* ===== Code Editor Modal ===== */
+.code-editor-container {
+  position: relative;
+}
+
+.code-editor {
+  width: 100%;
+  min-height: 400px;
+  padding: 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  color: #e4e4e7;
+  font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  tab-size: 4;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+.code-editor:focus {
+  border-color: var(--accent-blue);
+}
+
+.code-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.code-editor-title {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ===== Add Subtopic Button ===== */
+.add-subtopic-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  margin-bottom: 24px;
+}
+
+.add-subtopic-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  background: rgba(91, 106, 191, 0.05);
+}
+
+/* ===== Empty States ===== */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.empty-state-text {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.empty-state-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ===== Loading Spinner ===== */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Toast / Status ===== */
+.fetch-status {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.fetch-status.error {
+  color: var(--accent-red);
+}
+
+.fetch-status.success {
+  color: var(--accent-green);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .app {
+    padding: 16px;
+  }
+
+  .subtopic-header {
+    padding: 14px 16px;
+  }
+
+  .problems-section {
+    padding: 0 12px 16px;
+    overflow-x: auto;
+  }
+
+  .problems-table {
+    min-width: 600px;
+  }
+
+  .progress-bar-container {
+    width: 100px;
+  }
+}
+
+/* ===== Delete topic button ===== */
+.topic-tab-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.topic-delete-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-red);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  line-height: 1;
+}
+
+.topic-tab-wrapper:hover .topic-delete-btn {
+  display: flex;
+}
+
+/* ===== Bookmarks Tab ===== */
+.bookmarks-tab {
+  margin-left: auto;
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bookmarks-tab:hover {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+}
+
+.bookmarks-tab.active {
+  background: var(--accent-yellow);
+  border-color: var(--accent-yellow);
+  color: #1a1a1a;
+}
+
+/* ===== Bookmark Filter Button ===== */
+.bookmark-filter-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 5px 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.bookmark-filter-btn:hover {
+  border-color: var(--accent-yellow);
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--accent-yellow);
+}
+
+.bookmark-filter-btn.active {
+  border-color: var(--accent-yellow);
+  background: rgba(245, 158, 11, 0.15);
+  box-shadow: 0 0 0 1px var(--accent-yellow);
+  color: var(--accent-yellow);
+}
