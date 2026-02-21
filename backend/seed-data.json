@@ -1,0 +1,56 @@
+[
+  {
+    "topic": "Arrays",
+    "subtopics": [
+      {
+        "name": "Two Pointers",
+        "description": "",
+        "problems": [
+          "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/",
+          "https://leetcode.com/problems/3sum/",
+          "https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/",
+          "https://leetcode.com/problems/squares-of-a-sorted-array/",
+          "https://leetcode.com/problems/shortest-unsorted-continuous-subarray/",
+          "https://leetcode.com/problems/sort-colors/",
+          "https://leetcode.com/problems/merge-sorted-array/",
+          "https://leetcode.com/problems/longest-mountain-in-array/",
+          "https://leetcode.com/problems/3sum-closest/"
+        ]
+      },
+      {
+        "name": "Sorting",
+        "description": "",
+        "problems": [
+          "https://leetcode.com/problems/minimum-absolute-difference/"
+        ]
+      },
+      {
+        "name": "Merge Intervals",
+        "description": "",
+        "problems": []
+      },
+      {
+        "name": "Sliding Window",
+        "description": "",
+        "problems": []
+      },
+      {
+        "name": "Prefix Sum",
+        "description": "",
+        "problems": []
+      }
+    ]
+  },
+  {
+    "topic": "Binary Search",
+    "subtopics": [
+      {
+        "name": "Basic Binary Search",
+        "description": "",
+        "problems": [
+          "https://leetcode.com/problems/search-insert-position/"
+        ]
+      }
+    ]
+  }
+]

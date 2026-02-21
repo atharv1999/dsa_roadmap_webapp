@@ -94,6 +94,15 @@ export default function App() {
     await api.saveCode(problemId, code);
   };
 
+  const handleExportSeedData = async () => {
+    try {
+      await api.exportSeedData();
+      alert('seed-data.json updated successfully!');
+    } catch (err) {
+      alert('Export failed: ' + err.message);
+    }
+  };
+
   if (loading) {
     return (
       <div className="app">
@@ -111,6 +120,9 @@ export default function App() {
         <h1 className="app-title">
           <span>DSA</span> Roadmap
         </h1>
+        <button className="btn btn-secondary btn-sm" onClick={handleExportSeedData} title="Update seed-data.json with current problems">
+          📤 Export Seed Data
+        </button>
       </div>
 
       {/* Topic Tabs */}

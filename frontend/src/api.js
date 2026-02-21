@@ -42,3 +42,6 @@ export const getSubtopicStats = (subtopicId) => request(`/subtopics/${subtopicId
 
 // Bookmarks
 export const getBookmarkedProblems = () => request('/bookmarks');
+
+// Export
+export const exportSeedData = () => request('/export/save', { method: 'POST' });

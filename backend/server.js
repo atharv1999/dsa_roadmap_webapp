@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 const db = require('./database');
 const fetch = require('node-fetch');
 
@@ -25,6 +27,7 @@ app.post('/api/topics', (req, res) => {
     const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM topics').get();
     const result = db.prepare('INSERT INTO topics (name, sort_order) VALUES (?, ?)').run(name, maxOrder.max_order + 1);
     const topic = db.prepare('SELECT * FROM topics WHERE id = ?').get(result.lastInsertRowid);
+    autoExportSeed();
     res.status(201).json(topic);
   } catch (err) {
     if (err.message.includes('UNIQUE')) {
@@ -37,6 +40,7 @@ app.post('/api/topics', (req, res) => {
 // Delete a topic
 app.delete('/api/topics/:id', (req, res) => {
   db.prepare('DELETE FROM topics WHERE id = ?').run(req.params.id);
+  autoExportSeed();
   res.json({ success: true });
 });
 
@@ -57,12 +61,14 @@ app.post('/api/subtopics', (req, res) => {
   const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM subtopics WHERE topic_id = ?').get(topic_id);
   const result = db.prepare('INSERT INTO subtopics (topic_id, name, description, sort_order) VALUES (?, ?, ?, ?)').run(topic_id, name, description || '', maxOrder.max_order + 1);
   const subtopic = db.prepare('SELECT * FROM subtopics WHERE id = ?').get(result.lastInsertRowid);
+  autoExportSeed();
   res.status(201).json(subtopic);
 });
 
 // Delete a subtopic
 app.delete('/api/subtopics/:id', (req, res) => {
   db.prepare('DELETE FROM subtopics WHERE id = ?').run(req.params.id);
+  autoExportSeed();
   res.json({ success: true });
 });
 
@@ -133,6 +139,7 @@ app.post('/api/problems', (req, res) => {
     'INSERT INTO problems (subtopic_id, title, leetcode_url, difficulty, sort_order) VALUES (?, ?, ?, ?, ?)'
   ).run(subtopic_id, title, leetcode_url, difficulty || 'Easy', maxOrder.max_order + 1);
   const problem = db.prepare('SELECT * FROM problems WHERE id = ?').get(result.lastInsertRowid);
+  autoExportSeed();
   res.status(201).json(problem);
 });
 
@@ -165,6 +172,7 @@ app.patch('/api/problems/:id/code', (req, res) => {
 // Delete a problem
 app.delete('/api/problems/:id', (req, res) => {
   db.prepare('DELETE FROM problems WHERE id = ?').run(req.params.id);
+  autoExportSeed();
   res.json({ success: true });
 });
 
@@ -188,6 +196,155 @@ app.get('/api/bookmarks', (req, res) => {
   res.json(problems);
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+// ===================== SEED & EXPORT =====================
+
+// Helper: write current DB state to seed-data.json
+function autoExportSeed() {
+  try {
+    const topics = db.prepare('SELECT * FROM topics ORDER BY sort_order, id').all();
+    const result = topics.map(topic => {
+      const subtopics = db.prepare('SELECT * FROM subtopics WHERE topic_id = ? ORDER BY sort_order, id').all(topic.id);
+      return {
+        topic: topic.name,
+        subtopics: subtopics.map(sub => {
+          const problems = db.prepare('SELECT leetcode_url FROM problems WHERE subtopic_id = ? ORDER BY sort_order, id').all(sub.id);
+          return {
+            name: sub.name,
+            description: sub.description || '',
+            problems: problems.map(p => p.leetcode_url)
+          };
+        })
+      };
+    });
+    const seedPath = path.join(__dirname, 'seed-data.json');
+    fs.writeFileSync(seedPath, JSON.stringify(result, null, 2));
+  } catch (err) {
+    console.error('Auto-export seed failed:', err.message);
+  }
+}
+
+// Helper: fetch problem info from LeetCode
+async function fetchLeetcodeProblem(url) {
+  const match = url.match(/leetcode\.com\/problems\/([\w-]+)/);
+  if (!match) return null;
+  const slug = match[1];
+  try {
+    const query = `
+      query questionData($titleSlug: String!) {
+        question(titleSlug: $titleSlug) {
+          title
+          difficulty
+          titleSlug
+        }
+      }
+    `;
+    const response = await fetch('https://leetcode.com/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Referer': 'https://leetcode.com' },
+      body: JSON.stringify({ query, variables: { titleSlug: slug } }),
+    });
+    const data = await response.json();
+    if (data.data && data.data.question) {
+      const q = data.data.question;
+      return { title: q.title, difficulty: q.difficulty, url: `https://leetcode.com/problems/${q.titleSlug}/` };
+    }
+  } catch (err) {
+    console.error(`  Failed to fetch ${slug}: ${err.message}`);
+  }
+  // Fallback: derive title from slug
+  const title = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  return { title, difficulty: 'Easy', url };
+}
+
+// Seed database from seed-data.json on first run
+async function seedDatabase() {
+  const topicCount = db.prepare('SELECT COUNT(*) as count FROM topics').get().count;
+  if (topicCount > 0) {
+    console.log('Database already has data, skipping seed.');
+    return;
+  }
+
+  const seedPath = path.join(__dirname, 'seed-data.json');
+  if (!fs.existsSync(seedPath)) {
+    console.log('No seed-data.json found, skipping seed.');
+    return;
+  }
+
+  console.log('Seeding database from seed-data.json...');
+  const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
+
+  for (let ti = 0; ti < seedData.length; ti++) {
+    const topicData = seedData[ti];
+    const topicResult = db.prepare('INSERT INTO topics (name, sort_order) VALUES (?, ?)').run(topicData.topic, ti + 1);
+    const topicId = topicResult.lastInsertRowid;
+    console.log(`  Topic: ${topicData.topic}`);
+
+    for (let si = 0; si < topicData.subtopics.length; si++) {
+      const sub = topicData.subtopics[si];
+      const subResult = db.prepare('INSERT INTO subtopics (topic_id, name, description, sort_order) VALUES (?, ?, ?, ?)').run(topicId, sub.name, sub.description || '', si + 1);
+      const subtopicId = subResult.lastInsertRowid;
+      console.log(`    Subtopic: ${sub.name} (${sub.problems.length} problems)`);
+
+      for (let pi = 0; pi < sub.problems.length; pi++) {
+        const url = sub.problems[pi];
+        const info = await fetchLeetcodeProblem(url);
+        db.prepare('INSERT INTO problems (subtopic_id, title, leetcode_url, difficulty, sort_order) VALUES (?, ?, ?, ?, ?)').run(
+          subtopicId, info.title, info.url, info.difficulty, pi + 1
+        );
+        console.log(`      ${info.title} (${info.difficulty})`);
+        // Small delay to avoid rate limiting
+        await new Promise(r => setTimeout(r, 200));
+      }
+    }
+  }
+  console.log('Seeding complete!');
+}
+
+// Export current DB to seed-data.json format
+app.get('/api/export', (req, res) => {
+  const topics = db.prepare('SELECT * FROM topics ORDER BY sort_order, id').all();
+  const result = topics.map(topic => {
+    const subtopics = db.prepare('SELECT * FROM subtopics WHERE topic_id = ? ORDER BY sort_order, id').all(topic.id);
+    return {
+      topic: topic.name,
+      subtopics: subtopics.map(sub => {
+        const problems = db.prepare('SELECT leetcode_url FROM problems WHERE subtopic_id = ? ORDER BY sort_order, id').all(sub.id);
+        return {
+          name: sub.name,
+          description: sub.description || '',
+          problems: problems.map(p => p.leetcode_url)
+        };
+      })
+    };
+  });
+  res.json(result);
+});
+
+// Save export to seed-data.json file
+app.post('/api/export/save', (req, res) => {
+  const topics = db.prepare('SELECT * FROM topics ORDER BY sort_order, id').all();
+  const result = topics.map(topic => {
+    const subtopics = db.prepare('SELECT * FROM subtopics WHERE topic_id = ? ORDER BY sort_order, id').all(topic.id);
+    return {
+      topic: topic.name,
+      subtopics: subtopics.map(sub => {
+        const problems = db.prepare('SELECT leetcode_url FROM problems WHERE subtopic_id = ? ORDER BY sort_order, id').all(sub.id);
+        return {
+          name: sub.name,
+          description: sub.description || '',
+          problems: problems.map(p => p.leetcode_url)
+        };
+      })
+    };
+  });
+  const seedPath = path.join(__dirname, 'seed-data.json');
+  fs.writeFileSync(seedPath, JSON.stringify(result, null, 2));
+  res.json({ success: true, message: 'seed-data.json updated' });
+});
+
+// Start server and seed if needed
+seedDatabase().then(() => {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
+  });
 });
