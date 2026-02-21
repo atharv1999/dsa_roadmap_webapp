@@ -344,7 +344,13 @@ app.post('/api/export/save', (req, res) => {
 
 // Start server and seed if needed
 seedDatabase().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT} (network-accessible)`);
+  });
+  server.on('error', (err) => {
+    console.warn(`Could not bind to 0.0.0.0:${PORT} (${err.code}), falling back to localhost...`);
+    app.listen(PORT, '127.0.0.1', () => {
+      console.log(`Server running on http://localhost:${PORT} (localhost only)`);
+    });
   });
 });
