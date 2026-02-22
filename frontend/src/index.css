@@ -618,6 +618,49 @@ body {
   min-height: 80px;
 }
 
+/* Bulk add progress */
+.bulk-progress {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.bulk-progress-text {
+  font-size: 0.85em;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.bulk-results {
+  margin-top: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 0.82em;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bulk-result-item {
+  padding: 2px 0;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.bulk-result-item.success {
+  color: var(--green);
+}
+
+.bulk-result-item.fail {
+  color: var(--red);
+}
+
+.bulk-error-msg {
+  color: var(--text-muted);
+  font-family: var(--font-family);
+}
+
 .modal-actions {
   display: flex;
   gap: 10px;

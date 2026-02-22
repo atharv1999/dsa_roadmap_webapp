@@ -11,9 +11,10 @@ export default function SubtopicCard({
   const [isOpen, setIsOpen] = useState(true);
   const [problems, setProblems] = useState([]);
   const [stats, setStats] = useState({ total: 0, done: 0 });
-  const [leetcodeUrl, setLeetcodeUrl] = useState('');
+  const [leetcodeUrls, setLeetcodeUrls] = useState('');
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState('');
+  const [fetchProgress, setFetchProgress] = useState({ current: 0, total: 0, results: [] });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
 
@@ -32,25 +33,47 @@ export default function SubtopicCard({
     loadProblems();
   }, [loadProblems]);
 
-  const handleAddProblem = async () => {
-    if (!leetcodeUrl.trim()) return;
+  const handleAddProblems = async () => {
+    const urls = leetcodeUrls
+      .split('\n')
+      .map(u => u.trim())
+      .filter(u => u.length > 0);
+    if (urls.length === 0) return;
+
     setFetching(true);
     setFetchError('');
-    try {
-      const info = await api.fetchLeetcodeInfo(leetcodeUrl.trim());
-      await api.createProblem(subtopic.id, info.title, info.leetcode_url, info.difficulty);
-      setLeetcodeUrl('');
-      setShowAddModal(false);
-      await loadProblems();
-    } catch (err) {
-      setFetchError(err.message);
+    setFetchProgress({ current: 0, total: urls.length, results: [] });
+
+    const results = [];
+    for (let i = 0; i < urls.length; i++) {
+      setFetchProgress(prev => ({ ...prev, current: i + 1 }));
+      try {
+        const info = await api.fetchLeetcodeInfo(urls[i]);
+        await api.createProblem(subtopic.id, info.title, info.leetcode_url, info.difficulty);
+        results.push({ url: urls[i], success: true });
+      } catch (err) {
+        results.push({ url: urls[i], success: false, error: err.message });
+      }
+      setFetchProgress(prev => ({ ...prev, results: [...results] }));
     }
+
+    const failures = results.filter(r => !r.success);
+    if (failures.length === 0) {
+      setLeetcodeUrls('');
+      setShowAddModal(false);
+      setFetchProgress({ current: 0, total: 0, results: [] });
+    } else {
+      // Keep only the failed URLs in the textarea so user can retry
+      setLeetcodeUrls(failures.map(f => f.url).join('\n'));
+      setFetchError(`${failures.length} of ${urls.length} failed. Failed URLs kept below.`);
+    }
+    await loadProblems();
     setFetching(false);
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleAddProblem();
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      handleAddProblems();
     }
   };
 
@@ -104,7 +127,7 @@ export default function SubtopicCard({
           </div>
           <button
             className="btn btn-primary btn-sm"
-            onClick={(e) => { e.stopPropagation(); setShowAddModal(true); setFetchError(''); setLeetcodeUrl(''); }}
+            onClick={(e) => { e.stopPropagation(); setShowAddModal(true); setFetchError(''); setLeetcodeUrls(''); setFetchProgress({ current: 0, total: 0, results: [] }); }}
           >
             <PlusIcon size={14} /> Add
           </button>
@@ -175,34 +198,54 @@ export default function SubtopicCard({
           </div>
 
           {showAddModal && (
-            <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+            <div className="modal-overlay" onClick={() => { if (!fetching) setShowAddModal(false); }}>
               <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <h3 className="modal-title">Add Problem</h3>
+                <h3 className="modal-title">Add Problems</h3>
                 <div className="modal-field">
-                  <label>LeetCode URL</label>
-                  <input
-                    type="text"
-                    value={leetcodeUrl}
-                    onChange={(e) => { setLeetcodeUrl(e.target.value); setFetchError(''); }}
+                  <label>LeetCode URLs <span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '0.85em' }}>(one per line)</span></label>
+                  <textarea
+                    value={leetcodeUrls}
+                    onChange={(e) => { setLeetcodeUrls(e.target.value); setFetchError(''); }}
                     onKeyDown={handleKeyDown}
-                    placeholder="https://leetcode.com/problems/two-sum/"
+                    placeholder={'https://leetcode.com/problems/two-sum/\nhttps://leetcode.com/problems/3sum/\nhttps://leetcode.com/problems/valid-parentheses/'}
                     autoFocus
                     disabled={fetching}
+                    rows={5}
+                    style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}
                   />
                 </div>
+                {fetching && fetchProgress.total > 0 && (
+                  <div className="bulk-progress">
+                    <div className="bulk-progress-text">Adding {fetchProgress.current} of {fetchProgress.total}...</div>
+                    <div className="progress-bar-container" style={{ height: 6, marginTop: 6 }}>
+                      <div className="progress-bar-fill" style={{ width: `${(fetchProgress.current / fetchProgress.total) * 100}%` }} />
+                    </div>
+                    {fetchProgress.results.length > 0 && (
+                      <div className="bulk-results">
+                        {fetchProgress.results.map((r, i) => (
+                          <div key={i} className={`bulk-result-item ${r.success ? 'success' : 'fail'}`}>
+                            {r.success ? '✓' : '✗'} {r.url.replace(/.*\/problems\//, '').replace(/\/$/, '')}
+                            {!r.success && <span className="bulk-error-msg"> — {r.error}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 {fetchError && (
                   <div className="fetch-status error">⚠ {fetchError}</div>
                 )}
                 <div className="modal-actions">
-                  <button className="btn btn-secondary" onClick={() => setShowAddModal(false)}>Cancel</button>
+                  <button className="btn btn-secondary" onClick={() => setShowAddModal(false)} disabled={fetching}>Cancel</button>
                   <button
                     className="btn btn-primary"
-                    onClick={handleAddProblem}
-                    disabled={fetching || !leetcodeUrl.trim()}
+                    onClick={handleAddProblems}
+                    disabled={fetching || !leetcodeUrls.trim()}
                   >
-                    {fetching ? <span className="spinner" /> : 'Add'}
+                    {fetching ? <span className="spinner" /> : `Add ${leetcodeUrls.split('\n').filter(u => u.trim()).length || ''} Problem${leetcodeUrls.split('\n').filter(u => u.trim()).length !== 1 ? 's' : ''}`}
                   </button>
                 </div>
+                <div style={{ marginTop: 8, fontSize: '0.8em', color: 'var(--text-muted)' }}>Ctrl+Enter to submit</div>
               </div>
             </div>
           )}
