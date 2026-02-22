@@ -21,13 +21,25 @@
         "name": "Sorting",
         "description": "",
         "problems": [
-          "https://leetcode.com/problems/minimum-absolute-difference/"
+          "https://leetcode.com/problems/minimum-absolute-difference/",
+          "https://leetcode.com/problems/maximum-product-of-three-numbers/",
+          "https://leetcode.com/problems/array-partition/",
+          "https://leetcode.com/problems/merge-sorted-array/",
+          "https://leetcode.com/problems/largest-perimeter-triangle/",
+          "https://leetcode.com/problems/minimum-difference-between-highest-and-lowest-of-k-scores/",
+          "https://leetcode.com/problems/largest-number/"
         ]
       },
       {
         "name": "Merge Intervals",
         "description": "",
-        "problems": []
+        "problems": [
+          "https://leetcode.com/problems/merge-intervals/",
+          "https://leetcode.com/problems/insert-interval/",
+          "https://leetcode.com/problems/non-overlapping-intervals/",
+          "https://leetcode.com/problems/interval-list-intersections/",
+          "https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/"
+        ]
       },
       {
         "name": "Sliding Window",
