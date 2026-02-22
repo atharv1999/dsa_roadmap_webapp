@@ -256,48 +256,69 @@ async function fetchLeetcodeProblem(url) {
   return { title, difficulty: 'Easy', url };
 }
 
-// Seed database from seed-data.json on first run
+// Sync database with seed-data.json (incremental — only adds missing data)
 async function seedDatabase() {
-  const topicCount = db.prepare('SELECT COUNT(*) as count FROM topics').get().count;
-  if (topicCount > 0) {
-    console.log('Database already has data, skipping seed.');
-    return;
-  }
-
   const seedPath = path.join(__dirname, 'seed-data.json');
   if (!fs.existsSync(seedPath)) {
-    console.log('No seed-data.json found, skipping seed.');
+    console.log('No seed-data.json found, skipping sync.');
     return;
   }
 
-  console.log('Seeding database from seed-data.json...');
   const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
+  let added = { topics: 0, subtopics: 0, problems: 0 };
 
   for (let ti = 0; ti < seedData.length; ti++) {
     const topicData = seedData[ti];
-    const topicResult = db.prepare('INSERT INTO topics (name, sort_order) VALUES (?, ?)').run(topicData.topic, ti + 1);
-    const topicId = topicResult.lastInsertRowid;
-    console.log(`  Topic: ${topicData.topic}`);
+
+    // Find or create topic
+    let topic = db.prepare('SELECT * FROM topics WHERE name = ?').get(topicData.topic);
+    if (!topic) {
+      const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM topics').get();
+      const result = db.prepare('INSERT INTO topics (name, sort_order) VALUES (?, ?)').run(topicData.topic, maxOrder.max_order + 1);
+      topic = db.prepare('SELECT * FROM topics WHERE id = ?').get(result.lastInsertRowid);
+      added.topics++;
+      console.log(`  + Topic: ${topicData.topic}`);
+    }
 
     for (let si = 0; si < topicData.subtopics.length; si++) {
       const sub = topicData.subtopics[si];
-      const subResult = db.prepare('INSERT INTO subtopics (topic_id, name, description, sort_order) VALUES (?, ?, ?, ?)').run(topicId, sub.name, sub.description || '', si + 1);
-      const subtopicId = subResult.lastInsertRowid;
-      console.log(`    Subtopic: ${sub.name} (${sub.problems.length} problems)`);
 
+      // Find or create subtopic under this topic
+      let subtopic = db.prepare('SELECT * FROM subtopics WHERE topic_id = ? AND name = ?').get(topic.id, sub.name);
+      if (!subtopic) {
+        const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM subtopics WHERE topic_id = ?').get(topic.id);
+        const result = db.prepare('INSERT INTO subtopics (topic_id, name, description, sort_order) VALUES (?, ?, ?, ?)').run(topic.id, sub.name, sub.description || '', maxOrder.max_order + 1);
+        subtopic = db.prepare('SELECT * FROM subtopics WHERE id = ?').get(result.lastInsertRowid);
+        added.subtopics++;
+        console.log(`    + Subtopic: ${sub.name}`);
+      }
+
+      // Add only problems whose URL doesn't already exist in this subtopic
       for (let pi = 0; pi < sub.problems.length; pi++) {
         const url = sub.problems[pi];
-        const info = await fetchLeetcodeProblem(url);
-        db.prepare('INSERT INTO problems (subtopic_id, title, leetcode_url, difficulty, sort_order) VALUES (?, ?, ?, ?, ?)').run(
-          subtopicId, info.title, info.url, info.difficulty, pi + 1
-        );
-        console.log(`      ${info.title} (${info.difficulty})`);
-        // Small delay to avoid rate limiting
-        await new Promise(r => setTimeout(r, 200));
+        // Normalize URL for comparison (ensure trailing slash)
+        const normalizedUrl = url.endsWith('/') ? url : url + '/';
+        const existing = db.prepare('SELECT id FROM problems WHERE subtopic_id = ? AND (leetcode_url = ? OR leetcode_url = ?)').get(subtopic.id, url, normalizedUrl);
+        if (!existing) {
+          const info = await fetchLeetcodeProblem(url);
+          const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM problems WHERE subtopic_id = ?').get(subtopic.id);
+          db.prepare('INSERT INTO problems (subtopic_id, title, leetcode_url, difficulty, sort_order) VALUES (?, ?, ?, ?, ?)').run(
+            subtopic.id, info.title, info.url, info.difficulty, maxOrder.max_order + 1
+          );
+          added.problems++;
+          console.log(`      + ${info.title} (${info.difficulty})`);
+          // Small delay to avoid rate limiting
+          await new Promise(r => setTimeout(r, 200));
+        }
       }
     }
   }
-  console.log('Seeding complete!');
+
+  if (added.topics === 0 && added.subtopics === 0 && added.problems === 0) {
+    console.log('Seed sync: everything up to date.');
+  } else {
+    console.log(`Seed sync complete: +${added.topics} topics, +${added.subtopics} subtopics, +${added.problems} problems.`);
+  }
 }
 
 // Export current DB to seed-data.json format
