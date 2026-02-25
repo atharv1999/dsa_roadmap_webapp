@@ -21,23 +21,52 @@
         "name": "Sorting",
         "description": "",
         "problems": [
-          "https://leetcode.com/problems/minimum-absolute-difference/"
+          "https://leetcode.com/problems/minimum-absolute-difference/",
+          "https://leetcode.com/problems/maximum-product-of-three-numbers/",
+          "https://leetcode.com/problems/array-partition/",
+          "https://leetcode.com/problems/largest-perimeter-triangle/",
+          "https://leetcode.com/problems/minimum-difference-between-highest-and-lowest-of-k-scores/",
+          "https://leetcode.com/problems/largest-number/"
         ]
       },
       {
         "name": "Merge Intervals",
         "description": "",
-        "problems": []
+        "problems": [
+          "https://leetcode.com/problems/merge-intervals/",
+          "https://leetcode.com/problems/insert-interval/",
+          "https://leetcode.com/problems/non-overlapping-intervals/",
+          "https://leetcode.com/problems/interval-list-intersections/",
+          "https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/"
+        ]
       },
       {
         "name": "Sliding Window",
         "description": "",
-        "problems": []
+        "problems": [
+          "https://leetcode.com/problems/minimum-size-subarray-sum/",
+          "https://leetcode.com/problems/longest-continuous-increasing-subsequence/",
+          "https://leetcode.com/problems/maximum-points-you-can-obtain-from-cards/",
+          "https://leetcode.com/problems/fruit-into-baskets/",
+          "https://leetcode.com/problems/max-consecutive-ones-iii/",
+          "https://leetcode.com/problems/subarray-product-less-than-k/",
+          "https://leetcode.com/problems/maximum-average-subarray-i/",
+          "https://leetcode.com/problems/longest-mountain-in-array/"
+        ]
       },
       {
         "name": "Prefix Sum",
         "description": "",
-        "problems": []
+        "problems": [
+          "https://leetcode.com/problems/subarray-sum-equals-k/",
+          "https://leetcode.com/problems/find-pivot-index/",
+          "https://leetcode.com/problems/maximum-product-subarray/",
+          "https://leetcode.com/problems/subarray-sums-divisible-by-k/",
+          "https://leetcode.com/problems/contiguous-array/",
+          "https://leetcode.com/problems/shortest-subarray-with-sum-at-least-k/",
+          "https://leetcode.com/problems/count-of-range-sum/",
+          "https://leetcode.com/problems/max-sum-of-rectangle-no-larger-than-k/"
+        ]
       }
     ]
   },
