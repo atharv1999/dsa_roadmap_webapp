@@ -1,4 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import Editor from 'react-simple-code-editor';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-go';
+
+const LANGUAGES = [
+  { value: 'cpp', label: 'C++', prismKey: 'cpp' },
+  { value: 'java', label: 'Java', prismKey: 'java' },
+  { value: 'python', label: 'Python', prismKey: 'python' },
+  { value: 'go', label: 'Go', prismKey: 'go' },
+];
 
 export default function Modal({ title, onClose, children }) {
   return (
@@ -104,12 +120,13 @@ export function AddSubtopicModal({ topicId, onClose, onAdd }) {
 
 export function CodeEditorModal({ problem, onClose, onSave }) {
   const [code, setCode] = useState(problem.code_solution || '');
+  const [language, setLanguage] = useState(problem.code_language || 'cpp');
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSave(problem.id, code);
+      await onSave(problem.id, code, language);
       onClose();
     } catch (err) {
       alert(err.message);
@@ -117,17 +134,19 @@ export function CodeEditorModal({ problem, onClose, onSave }) {
     setSaving(false);
   };
 
+  const highlightCode = useCallback(
+    (code) => {
+      const lang = LANGUAGES.find((l) => l.value === language);
+      const grammar = Prism.languages[lang?.prismKey || 'cpp'];
+      if (grammar) {
+        return Prism.highlight(code, grammar, lang?.prismKey || 'cpp');
+      }
+      return code;
+    },
+    [language]
+  );
+
   const handleKeyDown = (e) => {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const start = e.target.selectionStart;
-      const end = e.target.selectionEnd;
-      const newValue = code.substring(0, start) + '    ' + code.substring(end);
-      setCode(newValue);
-      setTimeout(() => {
-        e.target.selectionStart = e.target.selectionEnd = start + 4;
-      }, 0);
-    }
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
       handleSave();
@@ -141,17 +160,38 @@ export function CodeEditorModal({ problem, onClose, onSave }) {
           <h3 className="modal-title" style={{ margin: 0 }}>
             {problem.title} — Solution
           </h3>
-          <span className="code-editor-title">Ctrl+S to save</span>
+          <div className="code-editor-header-right">
+            <select
+              className="language-dropdown"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              {LANGUAGES.map((lang) => (
+                <option key={lang.value} value={lang.value}>
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+            <span className="code-editor-title">Ctrl+S to save</span>
+          </div>
         </div>
-        <div className="code-editor-container">
-          <textarea
-            className="code-editor"
+        <div className="code-editor-container" onKeyDown={handleKeyDown}>
+          <Editor
             value={code}
-            onChange={(e) => setCode(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onValueChange={setCode}
+            highlight={highlightCode}
+            padding={16}
             placeholder="Paste your code solution here..."
-            spellCheck={false}
-            autoFocus
+            className="code-editor-highlighted"
+            textareaClassName="code-editor-textarea"
+            style={{
+              fontFamily: "'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'Consolas', monospace",
+              fontSize: 14,
+              lineHeight: 1.6,
+              background: 'var(--bg-input)',
+              color: '#e4e4e7',
+              tabSize: 4,
+            }}
           />
         </div>
         <div className="modal-actions">

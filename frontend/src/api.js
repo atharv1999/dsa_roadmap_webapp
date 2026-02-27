@@ -30,8 +30,8 @@ export const createProblem = (subtopic_id, title, leetcode_url, difficulty) =>
 export const deleteProblem = (id) => request(`/problems/${id}`, { method: 'DELETE' });
 export const toggleDone = (id) => request(`/problems/${id}/done`, { method: 'PATCH' });
 export const toggleBookmark = (id) => request(`/problems/${id}/bookmark`, { method: 'PATCH' });
-export const saveCode = (id, code_solution) =>
-  request(`/problems/${id}/code`, { method: 'PATCH', body: JSON.stringify({ code_solution }) });
+export const saveCode = (id, code_solution, code_language) =>
+  request(`/problems/${id}/code`, { method: 'PATCH', body: JSON.stringify({ code_solution, code_language }) });
 
 // LeetCode fetch
 export const fetchLeetcodeInfo = (url) =>

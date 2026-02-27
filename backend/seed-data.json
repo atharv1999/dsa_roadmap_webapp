@@ -127,5 +127,21 @@
         ]
       }
     ]
+  },
+  {
+    "topic": "Graphs",
+    "subtopics": []
+  },
+  {
+    "topic": "Strings",
+    "subtopics": [
+      {
+        "name": "Two Pointers",
+        "description": "",
+        "problems": [
+          "https://leetcode.com/problems/valid-palindrome/"
+        ]
+      }
+    ]
   }
 ]

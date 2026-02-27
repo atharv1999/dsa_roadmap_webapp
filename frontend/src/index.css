@@ -669,9 +669,6 @@ body {
 }
 
 /* ===== Code Editor Modal ===== */
-.code-editor-container {
-  position: relative;
-}
 
 .code-editor {
   width: 100%;
@@ -701,11 +698,137 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.code-editor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .code-editor-title {
   font-size: 14px;
   color: var(--text-secondary);
+}
+
+/* ===== Language Dropdown ===== */
+.language-dropdown {
+  padding: 6px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: auto;
+}
+
+.language-dropdown:hover,
+.language-dropdown:focus {
+  border-color: var(--accent-blue);
+}
+
+.language-dropdown option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* ===== Syntax Highlighted Editor ===== */
+.code-editor-container {
+  height: 500px;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+}
+
+.code-editor-highlighted {
+  min-height: 100% !important;
+  overflow: visible !important;
+}
+
+.code-editor-highlighted pre {
+  min-height: 100%;
+}
+
+.code-editor-textarea {
+  outline: none !important;
+  caret-color: #e4e4e7 !important;
+}
+
+.code-editor-highlighted:focus-within {
+  border-color: var(--accent-blue) !important;
+}
+
+/* Override PrismJS tomorrow theme for better integration */
+.code-editor-highlighted .token.comment,
+.code-editor-highlighted .token.block-comment,
+.code-editor-highlighted .token.prolog,
+.code-editor-highlighted .token.doctype,
+.code-editor-highlighted .token.cdata {
+  color: #6a737d;
+}
+
+.code-editor-highlighted .token.punctuation {
+  color: #bbb;
+}
+
+.code-editor-highlighted .token.tag,
+.code-editor-highlighted .token.namespace,
+.code-editor-highlighted .token.deleted {
+  color: #e06c75;
+}
+
+.code-editor-highlighted .token.function-name {
+  color: #61afef;
+}
+
+.code-editor-highlighted .token.boolean,
+.code-editor-highlighted .token.number {
+  color: #d19a66;
+}
+
+.code-editor-highlighted .token.function {
+  color: #61afef;
+}
+
+.code-editor-highlighted .token.property,
+.code-editor-highlighted .token.class-name,
+.code-editor-highlighted .token.constant,
+.code-editor-highlighted .token.symbol {
+  color: #e5c07b;
+}
+
+.code-editor-highlighted .token.selector,
+.code-editor-highlighted .token.important,
+.code-editor-highlighted .token.atrule,
+.code-editor-highlighted .token.keyword,
+.code-editor-highlighted .token.builtin {
+  color: #c678dd;
+}
+
+.code-editor-highlighted .token.string,
+.code-editor-highlighted .token.char,
+.code-editor-highlighted .token.attr-value,
+.code-editor-highlighted .token.regex,
+.code-editor-highlighted .token.variable {
+  color: #98c379;
+}
+
+.code-editor-highlighted .token.operator,
+.code-editor-highlighted .token.entity,
+.code-editor-highlighted .token.url {
+  color: #56b6c2;
+}
+
+.code-editor-highlighted .token.attr-name {
+  color: #d19a66;
 }
 
 /* ===== Add Subtopic Button ===== */

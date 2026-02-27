@@ -163,8 +163,8 @@ app.patch('/api/problems/:id/bookmark', (req, res) => {
 
 // Save code solution
 app.patch('/api/problems/:id/code', (req, res) => {
-  const { code_solution } = req.body;
-  db.prepare('UPDATE problems SET code_solution = ? WHERE id = ?').run(code_solution || '', req.params.id);
+  const { code_solution, code_language } = req.body;
+  db.prepare('UPDATE problems SET code_solution = ?, code_language = ? WHERE id = ?').run(code_solution || '', code_language || 'cpp', req.params.id);
   const problem = db.prepare('SELECT * FROM problems WHERE id = ?').get(req.params.id);
   res.json(problem);
 });

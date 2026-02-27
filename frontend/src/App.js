@@ -90,8 +90,8 @@ export default function App() {
     setSubtopics((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const handleSaveCode = async (problemId, code) => {
-    await api.saveCode(problemId, code);
+  const handleSaveCode = async (problemId, code, language) => {
+    await api.saveCode(problemId, code, language);
   };
 
   const handleExportSeedData = async () => {
